@@ -10,9 +10,12 @@ using System.Windows.Forms;
 
 namespace InstaBot
 {
-    public partial class Form1 : Form
+    public partial class InstaBot : Form
     {
-        public Form1()
+        private string filePathCSV;
+        private string filePathTXT;  
+
+        public InstaBot()
         {
             InitializeComponent();
         }
@@ -20,6 +23,40 @@ namespace InstaBot
         private void Form1_Load(object sender, EventArgs e)
         {
 
+        }
+
+        private void loadCsvButt_Click(object sender, EventArgs e)
+        {
+            fileDialog.Filter = "csv files (*.csv)|*.csv"; 
+
+            if (fileDialog.ShowDialog() != DialogResult.Cancel)
+            {
+                filePathCSV = fileDialog.FileName; 
+
+                //get only file name not the whole path
+                csvTextBox.Text = fileDialog.FileName.Split('\\').Last(); 
+            }
+            else
+            {
+                return;
+            }
+        }
+
+        private void loadTxtButt_Click(object sender, EventArgs e)
+        {
+            fileDialog.Filter = "txt files(*.txt) | *.txt";
+
+            if (fileDialog.ShowDialog() != DialogResult.Cancel)
+            {
+                filePathTXT = fileDialog.FileName; 
+
+                //get only file name not the whole path
+                txtTextBox.Text = fileDialog.FileName.Split('\\').Last();
+            }
+            else
+            {
+                return;
+            }
         }
     }
 }
