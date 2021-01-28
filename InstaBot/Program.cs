@@ -16,7 +16,7 @@ namespace InstaBot
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new InstaBot());
+            Application.Run(new MainWindow());
         }
     }
 }

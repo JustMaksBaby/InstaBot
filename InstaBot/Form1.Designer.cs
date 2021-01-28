@@ -1,6 +1,6 @@
 ﻿namespace InstaBot
 {
-    partial class InstaBot
+    partial class MainWindow
     {
         /// <summary>
         /// Обязательная переменная конструктора.
@@ -38,6 +38,7 @@
             this.startButt = new System.Windows.Forms.Button();
             this.stopButt = new System.Windows.Forms.Button();
             this.progressBar = new System.Windows.Forms.ProgressBar();
+            this.backgroundWorker = new System.ComponentModel.BackgroundWorker();
             this.SuspendLayout();
             // 
             // fileDialog
@@ -116,26 +117,35 @@
             this.startButt.TabIndex = 5;
             this.startButt.Text = "Начать";
             this.startButt.UseVisualStyleBackColor = true;
+            this.startButt.Click += new System.EventHandler(this.startButt_Click);
             // 
             // stopButt
             // 
+            this.stopButt.Enabled = false;
             this.stopButt.Location = new System.Drawing.Point(316, 169);
             this.stopButt.Name = "stopButt";
             this.stopButt.Size = new System.Drawing.Size(159, 53);
             this.stopButt.TabIndex = 6;
             this.stopButt.Text = "Остановить";
             this.stopButt.UseVisualStyleBackColor = true;
+            this.stopButt.Click += new System.EventHandler(this.stopButt_Click);
             // 
             // progressBar
             // 
             this.progressBar.Location = new System.Drawing.Point(152, 254);
             this.progressBar.Name = "progressBar";
             this.progressBar.Size = new System.Drawing.Size(241, 20);
+            this.progressBar.Step = 1;
             this.progressBar.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
-            this.progressBar.TabIndex = 7;
+            this.progressBar.TabIndex = 10;
             this.progressBar.Visible = false;
             // 
-            // InstaBot
+            // backgroundWorker
+            // 
+            this.backgroundWorker.WorkerReportsProgress = true;
+            this.backgroundWorker.WorkerSupportsCancellation = true;
+            // 
+            // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -150,8 +160,9 @@
             this.Controls.Add(this.loadCsvButt);
             this.Controls.Add(this.loadFileButton);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.Name = "InstaBot";
-            this.Text = "Form1";
+            this.Name = "MainWindow";
+            this.Text = "InstaBot";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainWindow_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -170,6 +181,7 @@
         private System.Windows.Forms.Button startButt;
         private System.Windows.Forms.Button stopButt;
         private System.Windows.Forms.ProgressBar progressBar;
+        private System.ComponentModel.BackgroundWorker backgroundWorker;
     }
 }
 
