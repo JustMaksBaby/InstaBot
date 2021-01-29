@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Net;
 using System.Threading;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace InstaBot
 {
@@ -70,32 +72,32 @@ namespace InstaBot
 
         private void startButt_Click(object sender, EventArgs e)
         {
+            //if the user didn`t choose csv or txt file
             if(!IsValid())
             {
                 MessageBox.Show("Не все данные были введены","Info" ); 
             }
             else
             {
-                //if we press stat button for the first time
+                //if  start button is pressed for the first time
                 if (_termination == null)
                 {
                     _termination = new ManualResetEvent(false);
-                    _inst = new Instagram(_filePathCSV, _filePathTXT, _termination);    
-                } 
+                    _inst = new Instagram(_filePathCSV, _filePathTXT, _termination);
+                }
                 else
                 {
                     _termination.Reset();
                 }
 
-
-                stopButt.Enabled = true; 
+                stopButt.Enabled = true;
                 startButt.Enabled = false;
 
                 _instThread = new Thread(_inst.Start);
                 _instThread.Start();
 
                 progressBar.Show();
-                
+               
             }
         }
         private void stopButt_Click(object sender, EventArgs e)
@@ -107,6 +109,11 @@ namespace InstaBot
 
             progressBar.Hide();
         }
+        private void MainWindow_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            _termination?.Set(); //stop  sending messages
+            _instThread?.Join(); //wait until instThread ends 
+        }
 
         /// <summary>
         /// Check if the user chose two files
@@ -115,29 +122,6 @@ namespace InstaBot
         {
             return _filePathCSV != null && _filePathTXT != null; 
         }
-            
-        private bool CheckInternetConnection()
-        {
-            using(WebClient client = new WebClient())
-            {
-                try
-                {
-                    using (client.OpenRead("http://google.com/generate_204"))
-                    {
-                        return true;
-                    }
-                }
-                catch (WebException)
-                {
-                    return false;
-                }    
-            }
-        }
 
-        private void MainWindow_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            _termination.Set(); //stop  sending messages
-            _instThread.Join(); //wait until instThread ends 
-        }
     }
 }
