@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.ComponentModel;
 using System.Threading; 
 using System.Net;
+using System.Windows.Forms; 
 using System.Diagnostics;
 
 namespace InstaBot
@@ -17,7 +18,7 @@ namespace InstaBot
         private  ManualResetEvent _termination; // track if the thread has to stop
 
         /// <summary>
-        /// check the internet connection
+        /// Check the internet connection
         /// </summary>
         /// <returns></returns>
         private static bool _CheckInternetConnection()
@@ -48,39 +49,17 @@ namespace InstaBot
             _termination = terminationEvent; 
         }
 
+
         public void Start() 
         {
-            if (!LoadChrome())
-            {
-                return;
-            } ;
+            LoadChrome(); 
         }
-        private bool LoadChrome()
+        private void LoadChrome()
         {
-            IntPtr openedChrome = WinAPI.FindWindow("Chrome_WidgetWin_1", "");
+            Process.Start("chrome", "https://www.instagram.com/"); // if chrome wasn`t loaded it will create a new process
+            Thread.Sleep(5000); // wait Instagram to load  
 
-
-            //if Chrome isn`t launched 
-            if (openedChrome == IntPtr.Zero)
-            {
-                Process.Start("chrome", "https://www.instagram.com/");
-                Thread.Sleep(5000); // wait Instgram loading
-                return true; 
-            }
-            else
-            {
-
-
-                //it is important that Instagram  page was opened in Chrome
-
-                //WinAPI.SetWindowPos(openedChrome, openedChrome, 0, 0, 200, 300, 0x0040); 
-                int success = WinAPI.SetForegroundWindow(openedChrome);
-                //if (success <= 0)
-                //{
-                //    return false;
-                //}
-                return true;
-            }
+            //SendKeys.SendWait("^{w}");                 
         }
     }
 }
