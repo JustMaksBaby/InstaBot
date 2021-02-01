@@ -8,7 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Threading;
-//using System.Diagnostics;
+using System.Diagnostics; 
+
+
 
 namespace InstaBot
 {
@@ -18,9 +20,6 @@ namespace InstaBot
         private string _filePathTXT; // path to where prepared messages are
 
         private Instagram _inst;
-
-        private Thread _instThread;    // thread where csv file is processed
-        ManualResetEvent _termination; // terminate the thread where csv file is processing
 
 
         public MainWindow()
@@ -77,40 +76,23 @@ namespace InstaBot
             }
             else
             {
-                //if  start button is pressed for the first time
-                if (_termination == null)
-                {
-                    _termination = new ManualResetEvent(false);
-                    _inst = new Instagram(_filePathCSV, _filePathTXT, _termination);
-                }
-                else
-                {
-                    _termination.Reset();
-                }
-
+                _inst = new Instagram(_filePathCSV, _filePathTXT); 
+               
                 stopButt.Enabled = true;
                 startButt.Enabled = false;
 
-                _instThread = new Thread(_inst.Start);
-                _instThread.Start();
-
                 progressBar.Show();
-               
+                    
+                backgroundWorker.RunWorkerAsync(); 
             }
         }
         private void stopButt_Click(object sender, EventArgs e)
         {
-            stopButt.Enabled = false;
-            startButt.Enabled = true;
-
-            _termination.Set(); //stop  sending messages
-
-            progressBar.Hide();
+            backgroundWorker.CancelAsync();     
         }
         private void MainWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
-            _termination?.Set(); //stop  sending messages
-            _instThread?.Join(); //wait until instThread ends 
+            backgroundWorker.CancelAsync();              
         }
 
         /// <summary>
@@ -121,5 +103,36 @@ namespace InstaBot
             return _filePathCSV != null && _filePathTXT != null; 
         }
 
+        private void backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+        { 
+            BackgroundWorker worker = sender as BackgroundWorker;
+
+            _inst.Start(worker, e); 
+        }
+
+        private void backgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if(e.Cancelled)
+            {
+                stopButt.Text = "Stoped"; 
+            }
+            else
+            {
+                ResultsEnum result = (ResultsEnum)e.Result; 
+                switch (result)
+                {
+                    case ResultsEnum.NO_INTERNET:
+                        {
+                            progressBar.Hide(); 
+                            MessageBox.Show("Нет интернета", "Info"); 
+                        }break;
+                }
+            }
+
+            stopButt.Enabled = false;
+            startButt.Enabled = true;
+
+            progressBar.Hide();
+        }
     }
 }
