@@ -8,6 +8,8 @@ namespace InstaBot
 {
     internal enum ResultsEnum
     {
-        NO_INTERNET
+        NO_INTERNET, 
+        PAUSE_ENDED, 
+        COMPLETED
     }
 }

@@ -22,6 +22,7 @@ namespace InstaBot
         private Instagram _inst;
 
 
+
         public MainWindow()
         {
             InitializeComponent();
@@ -112,27 +113,35 @@ namespace InstaBot
 
         private void backgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            if(e.Cancelled)
+       
+          
+            ResultsEnum result = (ResultsEnum)e.Result; 
+            switch (result)
             {
-                stopButt.Text = "Stoped"; 
+                case ResultsEnum.NO_INTERNET:
+                    {
+                        progressBar.Hide(); 
+                        MessageBox.Show("Нет интернета", "Info"); 
+                    }break;
             }
-            else
-            {
-                ResultsEnum result = (ResultsEnum)e.Result; 
-                switch (result)
-                {
-                    case ResultsEnum.NO_INTERNET:
-                        {
-                            progressBar.Hide(); 
-                            MessageBox.Show("Нет интернета", "Info"); 
-                        }break;
-                }
-            }
+         
 
             stopButt.Enabled = false;
             startButt.Enabled = true;
 
             progressBar.Hide();
+        }
+
+        private void backgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            //TODO get the  time for how long is the pause
+            //TODO get the  notification that proccess started;
+            
+        }
+
+        private void timer_Tick(object sender, EventArgs e)
+        {
+            //TODO implement counting the time to start 
         }
     }
 }

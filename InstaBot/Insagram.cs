@@ -55,6 +55,7 @@ namespace InstaBot
             _LoadTXTFile();
         }
 
+        // MAIN WORK
         /// <summary>
         /// Entry point to start the bot
         /// </summary>
@@ -62,29 +63,58 @@ namespace InstaBot
         /// <param name="events"></param>
         public void Start(BackgroundWorker worker, DoWorkEventArgs events) 
         {
-            if(!_CheckInternetConnection())
-            {
-                events.Result = ResultsEnum.NO_INTERNET;
-                return;
-            }
-
-            // set Chrome browser an active window
-            LoadChrome(); 
-            
-
+            Random random = new Random();
+           
             while(true)
             {
-                if(worker.CancellationPending)
+                // to prevent blocking the ability to send messages 
+                // set the maximum number of users before pause  to 15
+                int usersAmount = random.Next(10,15); 
+
+                LoadChrome();
+
+                while (--usersAmount != 0)
                 {
-                    events.Cancel = true;
-                    break; 
+                    if (!_CheckInternetConnection())
+                    {
+                        events.Result = ResultsEnum.NO_INTERNET;
+                        return;
+                    }
+
+                    //catch  the case when user whants to interrup the process
+                    if (worker.CancellationPending)
+                    {
+                        events.Cancel = true;
+                        break;
+                    }
+             
+                }
+
+                CloseChromeTab();
+
+                int waitFor = random.Next(15, 20); // get the time how long shoud the pause be
+
+                //fixate the time in minutes when the pause began 
+                //to process cases when the new hour started should use (DateTime.Now.Hour * 60) 
+                //However it isn`t safe when the  new hour is 00:00
+                int pauseStartedAt = (DateTime.Now.Hour * 60) + DateTime.Now.Minute;
+                int currentTime = (DateTime.Now.Hour * 60) + DateTime.Now.Minute;
+
+                while (currentTime - pauseStartedAt < waitFor)
+                {
+                    //in case if user wants to interrupt the process during the pause
+                    if (worker.CancellationPending)
+                    {
+                        events.Cancel = true;
+                        break;
+                    }
                 }
             }
             
         }
 
         /// <summary>
-        /// Sets Chrome browset an active window.
+        /// Sets Chrome browser an active window.
         /// It is important that Chrome window remains maximized
         /// Instagram account must be logged in before program starts
         /// During the program working you shound`t change tab in Chrome
@@ -92,13 +122,17 @@ namespace InstaBot
         private void LoadChrome()
         {
             Process.Start("chrome", "https://www.instagram.com/"); // if chrome wasn`t loaded it will create a new process
-            Thread.Sleep(5000); // wait Instagram to load  
-
-            //SendKeys.SendWait("^{w}");                 
+            Thread.Sleep(6000); // wait Instagram to load  
         }
         /// <summary>
         /// opens a CSV file with users nicknames
         /// </summary>
+        private void CloseChromeTab()
+        {   
+             SendKeys.SendWait("^{w}");                 
+        }
+
+        //FILE PROCESSING
         private void _OpenCSVFile()
         {
             //open csv file. This file stream is open as long as the app is running
@@ -166,6 +200,43 @@ namespace InstaBot
                 }
             }
         }
+
+        //
+        /// <summary>
+        /// Cleans data and returns pure  user name
+        /// </summary>
+        /// <param name="line"></param>
+        /// <returns></returns>
+        private string _GetNickname(string line)
+        {
+            string[] sepStr = line.Split('/');
+            //case '\USER_NAME'
+            if (sepStr.Length == 2)
+            {
+                return sepStr[1]; 
+            }
+            //case 'USER_NAME'
+            else if(sepStr.Length == 1)
+            {
+                return sepStr[0]; 
+            }
+            //case 'https://www.instagram.com/USER_NAME/?hl=ru'|'https://www.instagram.com/USER_NAME'|https://www.instagram.com/USER_NAME?123123'
+            else
+            {
+                //'https://www.instagram.com/USER_NAME/?hl=ru'
+                if (sepStr.Length == 5)
+                {
+                    return sepStr[3]; 
+                }
+                //'https://www.instagram.com/USER_NAME' + https://www.instagram.com/USER_NAME?123123'
+                else
+                {
+                    return sepStr[3].Split('?')[0]; 
+                }
+
+            }
+
+        } 
 
     }
 }

@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.fileDialog = new System.Windows.Forms.OpenFileDialog();
             this.loadFileButton = new System.Windows.Forms.Button();
             this.fileNameTextBox = new System.Windows.Forms.TextBox();
@@ -39,6 +40,7 @@
             this.stopButt = new System.Windows.Forms.Button();
             this.progressBar = new System.Windows.Forms.ProgressBar();
             this.backgroundWorker = new System.ComponentModel.BackgroundWorker();
+            this.timer = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
             // fileDialog
@@ -145,7 +147,12 @@
             this.backgroundWorker.WorkerReportsProgress = true;
             this.backgroundWorker.WorkerSupportsCancellation = true;
             this.backgroundWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker_DoWork);
+            this.backgroundWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.backgroundWorker_ProgressChanged);
             this.backgroundWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker_RunWorkerCompleted);
+            // 
+            // timer
+            // 
+            this.timer.Tick += new System.EventHandler(this.timer_Tick);
             // 
             // MainWindow
             // 
@@ -184,6 +191,7 @@
         private System.Windows.Forms.Button stopButt;
         private System.Windows.Forms.ProgressBar progressBar;
         private System.ComponentModel.BackgroundWorker backgroundWorker;
+        private System.Windows.Forms.Timer timer;
     }
 }
 
