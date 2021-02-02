@@ -41,6 +41,7 @@
             this.progressBar = new System.Windows.Forms.ProgressBar();
             this.backgroundWorker = new System.ComponentModel.BackgroundWorker();
             this.timer = new System.Windows.Forms.Timer(this.components);
+            this.timeInfoLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // fileDialog
@@ -154,11 +155,23 @@
             // 
             this.timer.Tick += new System.EventHandler(this.timer_Tick);
             // 
+            // timeInfoLabel
+            // 
+            this.timeInfoLabel.AutoSize = true;
+            this.timeInfoLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.timeInfoLabel.Location = new System.Drawing.Point(235, 250);
+            this.timeInfoLabel.Name = "timeInfoLabel";
+            this.timeInfoLabel.Size = new System.Drawing.Size(60, 24);
+            this.timeInfoLabel.TabIndex = 11;
+            this.timeInfoLabel.Text = "label1";
+            this.timeInfoLabel.Visible = false;
+            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(555, 296);
+            this.Controls.Add(this.timeInfoLabel);
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.stopButt);
             this.Controls.Add(this.startButt);
@@ -171,7 +184,6 @@
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.Name = "MainWindow";
             this.Text = "InstaBot";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainWindow_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -192,6 +204,7 @@
         private System.Windows.Forms.ProgressBar progressBar;
         private System.ComponentModel.BackgroundWorker backgroundWorker;
         private System.Windows.Forms.Timer timer;
+        private System.Windows.Forms.Label timeInfoLabel;
     }
 }
 

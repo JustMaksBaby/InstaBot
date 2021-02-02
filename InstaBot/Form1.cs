@@ -19,8 +19,8 @@ namespace InstaBot
         private string _filePathCSV; // path to where the data are
         private string _filePathTXT; // path to where prepared messages are
 
-    
-
+        private int _pauseFor = 0; // sets in seconds how long should the program wait before sending messages
+        private const int _TIMER_INTERVAL = 1000;  //sets the interval for timer 
 
 
         public MainWindow()
@@ -87,12 +87,25 @@ namespace InstaBot
         }
         private void stopButt_Click(object sender, EventArgs e)
         {
-            backgroundWorker.CancelAsync();     
+            //check if backgrounder currently is working
+            if (backgroundWorker.IsBusy)
+            {
+                backgroundWorker.CancelAsync();
+            } 
+            // Otherwise it means that program in pause
+            else
+            {
+                timeInfoLabel.Visible = false; 
+
+                timer.Enabled = false ; 
+
+                stopButt.Enabled = false;
+                startButt.Enabled = true;
+                
+
+            }
         }
-        private void MainWindow_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            backgroundWorker.CancelAsync();              
-        }
+       
 
         /// <summary>
         /// Check if the user chose two files
@@ -112,31 +125,52 @@ namespace InstaBot
 
         private void backgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            if (e.Cancelled)
-            {
-                //TODO show message in a label
-            }
-            else
+            if (!e.Cancelled)
             {
                 ResultsEnum result = (ResultsEnum)e.Result;
                 switch (result)
                 {
-                    case ResultsEnum.NO_INTERNET:
+                    case ResultsEnum.NO_INTERNET: 
                         {
-                            progressBar.Hide();
+                            progressBar.Hide(); 
+
+                            stopButt.Enabled = false;
+                            startButt.Enabled = true;
+
                             MessageBox.Show("Нет интернета", "Info");
                         }
                         break;
-                    case ResultsEnum.COMPLETED:
+                    case ResultsEnum.COMPLETED: //if there is no more uprocessed data in csv file
                         {
-                            // TODO react on case when the programm processed all the data
-                        }break;
+                            progressBar.Hide();
+
+                            stopButt.Enabled = false;
+                            startButt.Enabled = true;
+
+                            MessageBox.Show("Вся работа сделана", "Info");
+                        }
+                        break;
+                    case ResultsEnum.PAUSE_STARTED: //this case means that background worker stoped processing a csv file 
+                        {
+                            progressBar.Hide();
+
+                            _pauseFor = new Random().Next(1, 2) * 60; //in seconds 
+
+                            timeInfoLabel.Visible = true;
+
+                            timer.Interval = _TIMER_INTERVAL;
+                            timer.Enabled = true;
+                        }
+                        break;
                 }
             }
-            stopButt.Enabled = false;
-            startButt.Enabled = true;
+            else // if the processed was interrupted by a  user
+            {
+                stopButt.Enabled = false;
+                startButt.Enabled = true;
 
-            progressBar.Hide();
+                progressBar.Hide();
+            } 
         }
 
         private void backgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -148,7 +182,25 @@ namespace InstaBot
 
         private void timer_Tick(object sender, EventArgs e)
         {
-            //TODO implement counting the time to start 
+            /*UPDATES EVERY _TIME_INTERVAL miliseconds*/
+
+            if(_pauseFor <= 0) // create a new process if it is appropriate time
+            {
+                timeInfoLabel.Visible = false;  
+                timer.Enabled = false;  
+
+                progressBar.Show();
+
+                backgroundWorker.RunWorkerAsync();
+            }
+            else
+            {                 
+                _pauseFor -= 1; // count down remaining time
+                TimeSpan time = TimeSpan.FromSeconds(_pauseFor);
+
+                timeInfoLabel.Text = $"{time.Minutes}:{time.Seconds}"; 
+            }
         }
+
     }
 }

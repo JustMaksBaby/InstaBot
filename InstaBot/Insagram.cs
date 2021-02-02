@@ -66,63 +66,43 @@ namespace InstaBot
         {
             Random random = new Random();
            
-            while(true)
-            {
-                // to prevent blocking the ability to send messages 
-                // set the maximum number of users before pause  to 15
-                int usersAmount = random.Next(10,15); 
+            // to prevent blocking the ability to send messages 
+            // set the maximum number of users before pause  to 15
+            int usersAmount = random.Next(10,15); 
 
-                LoadChrome();
+            LoadChrome();
 
-                string userName; 
+            string userName; 
 
-                while (--usersAmount != 0)
-                { 
-                    if((userName = _openedCSV.ReadLine()) == null)
-                    {
-                        events.Result = ResultsEnum.COMPLETED;
-                        return;
-                    }
-                    if (!_CheckInternetConnection())
-                    {
-                        events.Result = ResultsEnum.NO_INTERNET;
-                        return;
-                    }
-
-                    //catch  the case when user whants to interrup the process
-                    if (worker.CancellationPending)
-                    {
-                        events.Cancel = true;
-                        return; 
-                    }
-             
+            while (--usersAmount != 0)
+            { 
+                if((userName = _openedCSV.ReadLine()) == null)
+                {
+                    events.Result = ResultsEnum.COMPLETED;
+                    return;
+                }
+                if (!_CheckInternetConnection())
+                {
+                    events.Result = ResultsEnum.NO_INTERNET;
+                    return;
                 }
 
-                CloseChromeTab();
-
-                int waitFor = random.Next(15, 20); // get the time how long shoud the pause be
-
-                //fixate the time in minutes when the pause began 
-                //to process cases when the new hour started should use (DateTime.Now.Hour * 60) 
-                //However it isn`t safe when the  new hour is 00:00
-                int pauseStartedAt = (DateTime.Now.Hour * 60) + DateTime.Now.Minute;
-                int currentTime = (DateTime.Now.Hour * 60) + DateTime.Now.Minute;
-
-                while (currentTime - pauseStartedAt < waitFor)
-                {   
-                    currentTime = (DateTime.Now.Hour * 60) + DateTime.Now.Minute;
-
-                    //in case if user wants to interrupt the process during the pause
-                    if (worker.CancellationPending)
-                    {
-                        events.Cancel = true;
-                        break;
-                    }
+                //catch  the case when user whants to interrup the process
+                if (worker.CancellationPending)
+                {
+                    events.Cancel = true;
+                    return; 
                 }
             }
+
+            CloseChromeTab();
+
+            events.Result = ResultsEnum.PAUSE_STARTED; 
+            
             
         }
 
+        //WORK WITH CHROME
         /// <summary>
         /// Sets Chrome browser an active window.
         /// It is important that Chrome window remains maximized
@@ -144,7 +124,9 @@ namespace InstaBot
 
         //FILE PROCESSING
         private void _OpenCSVFile()
-        { 
+        {
+            //TODO redo file opening.For now it causes an error if try to create new instagram instans; 
+
             FileStream csvStream = new FileStream(_filePathCSV,FileMode.Open);
             csvStream.Position = _LoadInfoFile(); // if we had this file processed before load info from where to start reading file
 

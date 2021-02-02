@@ -9,7 +9,7 @@ namespace InstaBot
     internal enum ResultsEnum
     {
         NO_INTERNET, 
-        PAUSE_ENDED, 
+        PAUSE_STARTED, 
         COMPLETED
     }
 }
