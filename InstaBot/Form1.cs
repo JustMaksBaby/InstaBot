@@ -19,7 +19,7 @@ namespace InstaBot
         private string _filePathCSV; // path to where the data are
         private string _filePathTXT; // path to where prepared messages are
 
-        private Instagram _inst;
+    
 
 
 
@@ -77,8 +77,6 @@ namespace InstaBot
             }
             else
             {
-                _inst = new Instagram(_filePathCSV, _filePathTXT); 
-               
                 stopButt.Enabled = true;
                 startButt.Enabled = false;
 
@@ -108,24 +106,33 @@ namespace InstaBot
         { 
             BackgroundWorker worker = sender as BackgroundWorker;
 
-            _inst.Start(worker, e); 
+            Instagram inst = new Instagram(_filePathCSV, _filePathTXT);
+            inst.Start(worker, e); 
         }
 
         private void backgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-       
-          
-            ResultsEnum result = (ResultsEnum)e.Result; 
-            switch (result)
+            if (e.Cancelled)
             {
-                case ResultsEnum.NO_INTERNET:
-                    {
-                        progressBar.Hide(); 
-                        MessageBox.Show("Нет интернета", "Info"); 
-                    }break;
+                //TODO show message in a label
             }
-         
-
+            else
+            {
+                ResultsEnum result = (ResultsEnum)e.Result;
+                switch (result)
+                {
+                    case ResultsEnum.NO_INTERNET:
+                        {
+                            progressBar.Hide();
+                            MessageBox.Show("Нет интернета", "Info");
+                        }
+                        break;
+                    case ResultsEnum.COMPLETED:
+                        {
+                            // TODO react on case when the programm processed all the data
+                        }break;
+                }
+            }
             stopButt.Enabled = false;
             startButt.Enabled = true;
 

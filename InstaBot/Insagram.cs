@@ -44,15 +44,16 @@ namespace InstaBot
 
         public Instagram(string filePathCSV, string filePathTXT)
         {
+
             _filePathCSV = filePathCSV;
             _filePathTXT = filePathTXT;
+
+            _OpenCSVFile();
+            _LoadTXTFile(); 
 
             //create name for info file 
             string csvFileName = _filePathCSV.Split('\\').Last().Split('.')[0];
             _infoFile = $"{csvFileName}_info.txt"; 
-
-            _OpenCSVFile();
-            _LoadTXTFile();
         }
 
         // MAIN WORK
@@ -73,8 +74,15 @@ namespace InstaBot
 
                 LoadChrome();
 
+                string userName; 
+
                 while (--usersAmount != 0)
-                {
+                { 
+                    if((userName = _openedCSV.ReadLine()) == null)
+                    {
+                        events.Result = ResultsEnum.COMPLETED;
+                        return;
+                    }
                     if (!_CheckInternetConnection())
                     {
                         events.Result = ResultsEnum.NO_INTERNET;
@@ -85,7 +93,7 @@ namespace InstaBot
                     if (worker.CancellationPending)
                     {
                         events.Cancel = true;
-                        break;
+                        return; 
                     }
              
                 }
@@ -101,7 +109,9 @@ namespace InstaBot
                 int currentTime = (DateTime.Now.Hour * 60) + DateTime.Now.Minute;
 
                 while (currentTime - pauseStartedAt < waitFor)
-                {
+                {   
+                    currentTime = (DateTime.Now.Hour * 60) + DateTime.Now.Minute;
+
                     //in case if user wants to interrupt the process during the pause
                     if (worker.CancellationPending)
                     {
@@ -134,8 +144,7 @@ namespace InstaBot
 
         //FILE PROCESSING
         private void _OpenCSVFile()
-        {
-            //open csv file. This file stream is open as long as the app is running
+        { 
             FileStream csvStream = new FileStream(_filePathCSV,FileMode.Open);
             csvStream.Position = _LoadInfoFile(); // if we had this file processed before load info from where to start reading file
 
