@@ -72,10 +72,12 @@ namespace InstaBot
             StreamReader openedCSV; //used to read nicknames from csv file line by line
             using (FileStream csvStream = new FileStream(_filePathCSV, FileMode.Open))
             {
-                csvStream.Position = _LoadInfoFile(); // if we had this file processed before load info from where to start reading file
+                int readBytes = _LoadInfoFile(); 
+                csvStream.Position = readBytes;
 
                 openedCSV = new StreamReader(csvStream);
                 string userName;
+                string trimedString; // containt string without spaces
                 while (--usersAmount != 0)
                 {
                     if ((userName = openedCSV.ReadLine()) == null)
@@ -83,11 +85,26 @@ namespace InstaBot
                         events.Result = ResultsEnum.COMPLETED;
                         return;
                     }
+
+
                     if (!_CheckInternetConnection())
-                    {
+                    { 
                         events.Result = ResultsEnum.NO_INTERNET;
                         return;
                     }
+
+                    trimedString = userName.Trim();  
+                    readBytes += userName.Length + 2; // add original size of the line. +2 for '/n' and '/r' 
+
+                    //not instagram link was passed
+                    if (!_IsInstagramLink(trimedString))
+                    {
+                        _SaveInfoFile(readBytes);
+                        continue; 
+                    }
+
+                    //TODO  process user name
+                    _SaveInfoFile(readBytes); 
 
                     //catch  the case when user whants to interrup the process
                     if (worker.CancellationPending)
@@ -124,17 +141,6 @@ namespace InstaBot
         }
 
         //FILE PROCESSING
-        private void _OpenCSVFile()
-        {
-            //TODO redo file opening.For now it causes an error if try to create new instagram instans; 
-
-            //FileStream csvStream = new FileStream(_filePathCSV,FileMode.Open);
-            //csvStream.Position = _LoadInfoFile(); // if we had this file processed before load info from where to start reading file
-            //
-            //openedCSV = new StreamReader(csvStream);
-            
-        }
-
         /// <summary>
         /// Load information about how many bytes were read  from csv file
         /// This information is used if  we stopped processing file and need to resume later
@@ -143,6 +149,7 @@ namespace InstaBot
         /// <returns></returns>
         private int _LoadInfoFile()
         {
+            // if csv file  has been processed before 
             if (File.Exists(_infoFile))
             {
                 using (StreamReader file = new StreamReader(_infoFile))
@@ -228,7 +235,33 @@ namespace InstaBot
 
             }
 
-        } 
+        }  
+        
+        /// <summary>
+        /// If from the csv file was read link  'https://...'
+        /// This function checks if the link is from instagram
+        /// If just username was passed to link the return values is true
+        /// </summary>
+        /// <param name="link"></param>
+        /// <returns></returns>
+        private bool _IsInstagramLink(string link)
+        {
+            // if from file was read '\n' or line contained only spaces
+            if(link.Length == 0)
+            {
+                return false;
+            }
+            else if(link.Length >4)
+            {
+               // instagram link will be splited to [https://wwww, instagram, com/....]
+               if(link.Substring(0,4) == "http" && link.Split('.')[1] != "instagram")
+                {
+                    return false; 
+                }
+                return true; 
+            }
+            return true;
+        }
 
     }
 }
