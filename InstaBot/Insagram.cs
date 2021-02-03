@@ -17,7 +17,6 @@ namespace InstaBot
         private string _filePathCSV; // path to where the data are 
         private string _filePathTXT; // path to where prepared messages are
         private string _infoFile;    //name for the file where number of read bytes is stored
-        private StreamReader _openedCSV; //used to read nicknames from csv file line by line
         private List<string>  messagesToUser = new List<string>();  //stores messages that will be sent to users
 
         /// <summary>
@@ -44,11 +43,9 @@ namespace InstaBot
 
         public Instagram(string filePathCSV, string filePathTXT)
         {
-
             _filePathCSV = filePathCSV;
             _filePathTXT = filePathTXT;
 
-            _OpenCSVFile();
             _LoadTXTFile(); 
 
             //create name for info file 
@@ -72,34 +69,38 @@ namespace InstaBot
 
             LoadChrome();
 
-            string userName; 
+            StreamReader openedCSV; //used to read nicknames from csv file line by line
+            using (FileStream csvStream = new FileStream(_filePathCSV, FileMode.Open))
+            {
+                csvStream.Position = _LoadInfoFile(); // if we had this file processed before load info from where to start reading file
 
-            while (--usersAmount != 0)
-            { 
-                if((userName = _openedCSV.ReadLine()) == null)
+                openedCSV = new StreamReader(csvStream);
+                string userName;
+                while (--usersAmount != 0)
                 {
-                    events.Result = ResultsEnum.COMPLETED;
-                    return;
-                }
-                if (!_CheckInternetConnection())
-                {
-                    events.Result = ResultsEnum.NO_INTERNET;
-                    return;
+                    if ((userName = openedCSV.ReadLine()) == null)
+                    {
+                        events.Result = ResultsEnum.COMPLETED;
+                        return;
+                    }
+                    if (!_CheckInternetConnection())
+                    {
+                        events.Result = ResultsEnum.NO_INTERNET;
+                        return;
+                    }
+
+                    //catch  the case when user whants to interrup the process
+                    if (worker.CancellationPending)
+                    {
+                        events.Cancel = true;
+                        return;
+                    }
                 }
 
-                //catch  the case when user whants to interrup the process
-                if (worker.CancellationPending)
-                {
-                    events.Cancel = true;
-                    return; 
-                }
+                CloseChromeTab();
+
+                events.Result = ResultsEnum.PAUSE_STARTED;
             }
-
-            CloseChromeTab();
-
-            events.Result = ResultsEnum.PAUSE_STARTED; 
-            
-            
         }
 
         //WORK WITH CHROME
@@ -127,10 +128,10 @@ namespace InstaBot
         {
             //TODO redo file opening.For now it causes an error if try to create new instagram instans; 
 
-            FileStream csvStream = new FileStream(_filePathCSV,FileMode.Open);
-            csvStream.Position = _LoadInfoFile(); // if we had this file processed before load info from where to start reading file
-
-            _openedCSV = new StreamReader(csvStream);
+            //FileStream csvStream = new FileStream(_filePathCSV,FileMode.Open);
+            //csvStream.Position = _LoadInfoFile(); // if we had this file processed before load info from where to start reading file
+            //
+            //openedCSV = new StreamReader(csvStream);
             
         }
 

@@ -92,7 +92,7 @@ namespace InstaBot
             {
                 backgroundWorker.CancelAsync();
             } 
-            // Otherwise it means that program in pause
+            // Otherwise it means that program in pause 
             else
             {
                 timeInfoLabel.Visible = false; 
