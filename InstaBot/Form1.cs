@@ -120,48 +120,51 @@ namespace InstaBot
             BackgroundWorker worker = sender as BackgroundWorker;
 
             Instagram inst = new Instagram(_filePathCSV, _filePathTXT);
-            inst.Start(worker, e); 
+            inst.Start(worker, e);
         }
 
         private void backgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             if (!e.Cancelled)
             {
-                ResultsEnum result = (ResultsEnum)e.Result;
-                switch (result)
+                if (e.Result is ResultsEnum)
                 {
-                    case ResultsEnum.NO_INTERNET: 
-                        {
-                            progressBar.Hide(); 
+                    ResultsEnum result = (ResultsEnum)e.Result;
+                    switch (result)
+                    {
+                        case ResultsEnum.NO_INTERNET:
+                            {
+                                progressBar.Hide();
 
-                            stopButt.Enabled = false;
-                            startButt.Enabled = true;
+                                stopButt.Enabled = false;
+                                startButt.Enabled = true;
 
-                            MessageBox.Show("Нет интернета", "Info");
-                        }
-                        break;
-                    case ResultsEnum.COMPLETED: //if there is no more uprocessed data in csv file
-                        {
-                            progressBar.Hide();
+                                MessageBox.Show("Нет интернета", "Info");
+                            }
+                            break;
+                        case ResultsEnum.COMPLETED: //if there is no more uprocessed data in csv file
+                            {
+                                progressBar.Hide();
 
-                            stopButt.Enabled = false;
-                            startButt.Enabled = true;
+                                stopButt.Enabled = false;
+                                startButt.Enabled = true;
 
-                            MessageBox.Show("Вся работа сделана", "Info");
-                        }
-                        break;
-                    case ResultsEnum.PAUSE_STARTED: //this case means that background worker stoped processing a csv file 
-                        {
-                            progressBar.Hide();
+                                MessageBox.Show("Вся работа сделана", "Info");
+                            }
+                            break;
+                        case ResultsEnum.PAUSE_STARTED: //this case means that background worker stoped processing a csv file 
+                            {
+                                progressBar.Hide();
 
-                            _pauseFor = new Random().Next(1, 2) * 60; //in seconds 
+                                _pauseFor = new Random().Next(1, 2) * 60; //in seconds 
 
-                            timeInfoLabel.Visible = true;
+                                timeInfoLabel.Visible = true;
 
-                            timer.Interval = _TIMER_INTERVAL;
-                            timer.Enabled = true;
-                        }
-                        break;
+                                timer.Interval = _TIMER_INTERVAL;
+                                timer.Enabled = true;
+                            }
+                            break;
+                    }
                 }
             }
             else // if the processed was interrupted by a  user

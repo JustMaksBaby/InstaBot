@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 using System.ComponentModel;
 using System.Threading; 
 using System.Net;
+using System.Net.Http;
 using System.Windows.Forms; 
 using System.Diagnostics;
 using System.IO;
+
 
 namespace InstaBot
 {
@@ -59,7 +61,7 @@ namespace InstaBot
         /// </summary>
         /// <param name="worker">Backgroundworker that started current process</param>
         /// <param name="events"></param>
-        public void Start(BackgroundWorker worker, DoWorkEventArgs events) 
+        public  void Start(BackgroundWorker worker, DoWorkEventArgs events) 
         {
             Random random = new Random();
            
@@ -76,11 +78,11 @@ namespace InstaBot
                 csvStream.Position = readBytes;
 
                 openedCSV = new StreamReader(csvStream);
-                string userName;
-                string trimedString; // containt string without spaces
+                string line; // unprocessed line from csv file
+                string trimedLine; // contains string without spaces
                 while (--usersAmount != 0)
                 {
-                    if ((userName = openedCSV.ReadLine()) == null)
+                    if ((line = openedCSV.ReadLine()) == null)
                     {
                         events.Result = ResultsEnum.COMPLETED;
                         return;
@@ -93,17 +95,23 @@ namespace InstaBot
                         return;
                     }
 
-                    trimedString = userName.Trim();  
-                    readBytes += userName.Length + 2; // add original size of the line. +2 for '/n' and '/r' 
+                    trimedLine = line.Trim();  
+                    readBytes += line.Length + 2; // add original size of the line. +2 for '/n' and '/r' 
 
                     //not instagram link was passed
-                    if (!_IsInstagramLink(trimedString))
+                    if (!_IsInstagramLink(trimedLine))
                     {
                         _SaveInfoFile(readBytes);
                         continue; 
                     }
 
-                    //TODO  process user name
+                    string userName = _GetNickname(trimedLine); // get only user name from line
+                    if (_UserExists(userName)) // check if the user with current name exists in Instragram
+                    {
+                        string message = messagesToUser[new Random().Next(0, messagesToUser.Count)]; //get random message for each user
+                        _SendMessageAction(userName, message);
+                    }
+                   
                     _SaveInfoFile(readBytes); 
 
                     //catch  the case when user whants to interrup the process
@@ -261,6 +269,25 @@ namespace InstaBot
                 return true; 
             }
             return true;
+        }
+
+        private  bool _UserExists(string user)
+        {
+            using (HttpClient client = new HttpClient())
+            { 
+                Task<HttpResponseMessage> response =  client.GetAsync($"https://www.instagram.com/{user}/");
+
+                Task.WaitAll(response);
+                if (response.Result.StatusCode == HttpStatusCode.NotFound)
+                {
+                    return false;
+                }
+            }  
+                return true;
+        }
+        private void _SendMessageAction(string userName, string message)
+        {
+
         }
 
     }
