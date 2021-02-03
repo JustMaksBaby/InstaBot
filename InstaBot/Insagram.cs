@@ -10,19 +10,46 @@ using System.Net.Http;
 using System.Windows.Forms; 
 using System.Diagnostics;
 using System.IO;
-
+using System.Runtime.InteropServices;
 
 namespace InstaBot
 {
- internal class Instagram
+    internal class MouseAction
     {
-        private string _filePathCSV; // path to where the data are 
+        /// <summary>
+        /// Immitates mouse`s buttons pressing
+        /// </summary>
+        [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
+        private static extern void mouse_event(uint dwFlags, uint dx, uint dy, uint cButtons, uint dwExtraInfo); 
+   
+        [DllImport("User32.Dll")]
+        private static extern long SetCursorPos(uint x, uint y);
+
+        //Mouse actions
+        private const int MOUSEEVENTF_LEFTDOWN = 0x02;
+        private const int MOUSEEVENTF_LEFTUP = 0x04;
+
+        public static  void MousePressLeft(uint x, uint y, Random random)
+        {
+            SetCursorPos(x, y);
+
+            Thread.Sleep(random.Next(2000, 2500));  // immitates pause like a human
+
+            mouse_event(MOUSEEVENTF_LEFTDOWN|MOUSEEVENTF_LEFTUP, x, y, 0,0); 
+        }
+    } 
+    internal class Instagram
+    {
+        private string _filePathCSV; // path to where the users nick names  are 
         private string _filePathTXT; // path to where prepared messages are
-        private string _infoFile;    //name for the file where number of read bytes is stored
-        private List<string>  messagesToUser = new List<string>();  //stores messages that will be sent to users
+        private string _infoFile;    // name for the file where number of read bytes is stored
+
+        private List<string>  _messagesToUser = new List<string>();  // stores messages that will be sent to users
+
+        private Random _random; 
 
         /// <summary>
-        /// Check the internet connection
+        /// Checks the internet connection
         /// </summary>
         /// <returns></returns>
         private static bool _CheckInternetConnection()
@@ -63,11 +90,11 @@ namespace InstaBot
         /// <param name="events"></param>
         public  void Start(BackgroundWorker worker, DoWorkEventArgs events) 
         {
-            Random random = new Random();
-           
+            _random = new Random();
+
             // to prevent blocking the ability to send messages 
             // set the maximum number of users before pause  to 15
-            int usersAmount = random.Next(10,15); 
+            int usersAmount = _random.Next(10,15); 
 
             LoadChrome();
 
@@ -108,7 +135,7 @@ namespace InstaBot
                     string userName = _GetNickname(trimedLine); // get only user name from line
                     if (_UserExists(userName)) // check if the user with current name exists in Instragram
                     {
-                        string message = messagesToUser[new Random().Next(0, messagesToUser.Count)]; //get random message for each user
+                        string message = _messagesToUser[_random.Next(0, _messagesToUser.Count)]; //get random message for each user
                         _SendMessageAction(userName, message);
                     }
                    
@@ -138,7 +165,7 @@ namespace InstaBot
         private void LoadChrome()
         {
             Process.Start("chrome", "https://www.instagram.com/"); // if chrome wasn`t loaded it will create a new process
-            Thread.Sleep(6000); // wait Instagram to load  
+            Thread.Sleep(5000); // wait Instagram to load  
         }
         /// <summary>
         /// opens a CSV file with users nicknames
@@ -202,7 +229,7 @@ namespace InstaBot
                     //to avoid lines that consist only of /n and spaces 
                     if (message.Length > 1 && message[0] !=' ')
                     {
-                        messagesToUser.Add(message);                                       
+                        _messagesToUser.Add(message);                                       
                     }
                 }
             }
@@ -271,6 +298,9 @@ namespace InstaBot
             return true;
         }
 
+        /// <summary>
+        /// Checks is the user with a certain nick name  exists in Instagram
+        /// </summary>
         private  bool _UserExists(string user)
         {
             using (HttpClient client = new HttpClient())
@@ -285,9 +315,51 @@ namespace InstaBot
             }  
                 return true;
         }
+
+        /// <summary>
+        /// Send a message to a user
+        /// </summary>
         private void _SendMessageAction(string userName, string message)
         {
+            
+            //press button to go on messages page
+            MouseAction.MousePressLeft(1086,134, _random); 
+            Thread.Sleep(_random.Next(1000, 2000));
 
+            //press button to seach users
+            MouseAction.MousePressLeft(615, 202, _random);
+            Thread.Sleep(_random.Next(1000, 3000));
+
+            //copy and paste user name in the opened field
+            Thread thread = new Thread(() => Clipboard.SetText(userName));
+            thread.SetApartmentState(ApartmentState.STA); //Set the thread to STA
+            thread.Start();
+            thread.Join();
+            SendKeys.SendWait("^{v}");
+            Thread.Sleep(_random.Next(2000, 3000));  
+
+            //press on the the first user
+            MouseAction.MousePressLeft(752,443, _random);
+            Thread.Sleep(_random.Next(2000, 3000));
+
+            // press on the button "Next"
+            MouseAction.MousePressLeft(923, 314, _random);
+            Thread.Sleep(_random.Next(2000, 3000));
+
+            //copy and paste message for the user
+            thread = new Thread(() => Clipboard.SetText(message));
+            thread.SetApartmentState(ApartmentState.STA); //Set the thread to STA
+            thread.Start();
+            thread.Join();
+            Thread.Sleep(_random.Next(5000, 6000));
+            SendKeys.SendWait("^{v}");
+
+            //press Enter to send the message
+            Thread.Sleep(_random.Next(2000, 3000)); 
+            SendKeys.SendWait("{ENTER}");
+
+
+            Thread.Sleep(_random.Next(2000, 3000)); 
         }
 
     }

@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace InstaBot
 {
+    /// <summary>
+    /// Results of backgroundworker`s thread 
+    /// </summary>
     internal enum ResultsEnum
     {
         NO_INTERNET, 

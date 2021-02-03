@@ -22,6 +22,7 @@ namespace InstaBot
         private int _pauseFor = 0; // sets in seconds how long should the program wait before sending messages
         private const int _TIMER_INTERVAL = 1000;  //sets the interval for timer 
 
+        private Random _random = new Random(); 
 
         public MainWindow()
         {
@@ -101,8 +102,6 @@ namespace InstaBot
 
                 stopButt.Enabled = false;
                 startButt.Enabled = true;
-                
-
             }
         }
        
@@ -156,7 +155,7 @@ namespace InstaBot
                             {
                                 progressBar.Hide();
 
-                                _pauseFor = new Random().Next(1, 2) * 60; //in seconds 
+                                _pauseFor = _random.Next(15, 19) * 60; //in seconds 
 
                                 timeInfoLabel.Visible = true;
 
@@ -174,13 +173,6 @@ namespace InstaBot
 
                 progressBar.Hide();
             } 
-        }
-
-        private void backgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        {
-            //TODO get the  time for how long is the pause
-            //TODO get the  notification that proccess started;
-            
         }
 
         private void timer_Tick(object sender, EventArgs e)
