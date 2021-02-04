@@ -96,7 +96,7 @@ namespace InstaBot
             // set the maximum number of users before pause  to 15
             int usersAmount = _random.Next(10,15); 
 
-            LoadChrome();
+            _LoadChrome();
 
             StreamReader openedCSV; //used to read nicknames from csv file line by line
             using (FileStream csvStream = new FileStream(_filePathCSV, FileMode.Open))
@@ -115,10 +115,10 @@ namespace InstaBot
                         return;
                     }
 
-
                     if (!_CheckInternetConnection())
                     { 
                         events.Result = ResultsEnum.NO_INTERNET;
+                        _CloseChromeTab(); 
                         return;
                     }
 
@@ -149,7 +149,7 @@ namespace InstaBot
                     }
                 }
 
-                CloseChromeTab();
+                _CloseChromeTab();
 
                 events.Result = ResultsEnum.PAUSE_STARTED;
             }
@@ -162,7 +162,7 @@ namespace InstaBot
         /// Instagram account must be logged in before program starts
         /// During the program working you shound`t change tab in Chrome
         /// </summary>
-        private void LoadChrome()
+        private void _LoadChrome()
         {
             Process.Start("chrome", "https://www.instagram.com/"); // if chrome wasn`t loaded it will create a new process
             Thread.Sleep(5000); // wait Instagram to load  
@@ -170,7 +170,7 @@ namespace InstaBot
         /// <summary>
         /// opens a CSV file with users nicknames
         /// </summary>
-        private void CloseChromeTab()
+        private void _CloseChromeTab()
         {   
              SendKeys.SendWait("^{w}");                 
         }

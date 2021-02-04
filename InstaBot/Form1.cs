@@ -93,9 +93,11 @@ namespace InstaBot
             {
                 backgroundWorker.CancelAsync();
             } 
-            // Otherwise it means that program in pause 
+            // Otherwise it means that program in pause or in 'no Internet state'
             else
             {
+                noInternetLabel.Visible = false; 
+
                 timeInfoLabel.Visible = false; 
 
                 timer.Enabled = false ; 
@@ -133,12 +135,19 @@ namespace InstaBot
                     {
                         case ResultsEnum.NO_INTERNET:
                             {
+                                /* In case if the internet connection was lost the program will  
+                                  be trying each 2 minutes to start new thread */ 
+
                                 progressBar.Hide();
 
-                                stopButt.Enabled = false;
-                                startButt.Enabled = true;
+                                _pauseFor = 2 * 60; //in seconds 
 
-                                MessageBox.Show("Нет интернета", "Info");
+                                timeInfoLabel.Visible = true;
+
+                                timer.Interval = _TIMER_INTERVAL;
+                                timer.Enabled = true;
+
+                                noInternetLabel.Visible = true; 
                             }
                             break;
                         case ResultsEnum.COMPLETED: //if there is no more uprocessed data in csv file
@@ -182,11 +191,13 @@ namespace InstaBot
             if(_pauseFor <= 0) // create a new process if it is appropriate time
             {
                 timeInfoLabel.Visible = false;  
-                timer.Enabled = false;  
+                timer.Enabled = false;
+
+                noInternetLabel.Visible = false;
 
                 progressBar.Show();
 
-                backgroundWorker.RunWorkerAsync();
+                backgroundWorker.RunWorkerAsync(); 
             }
             else
             {                 

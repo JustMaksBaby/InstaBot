@@ -42,6 +42,7 @@
             this.backgroundWorker = new System.ComponentModel.BackgroundWorker();
             this.timer = new System.Windows.Forms.Timer(this.components);
             this.timeInfoLabel = new System.Windows.Forms.Label();
+            this.noInternetLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // fileDialog
@@ -158,18 +159,29 @@
             // 
             this.timeInfoLabel.AutoSize = true;
             this.timeInfoLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.timeInfoLabel.Location = new System.Drawing.Point(235, 250);
+            this.timeInfoLabel.Location = new System.Drawing.Point(236, 263);
             this.timeInfoLabel.Name = "timeInfoLabel";
-            this.timeInfoLabel.Size = new System.Drawing.Size(60, 24);
+            this.timeInfoLabel.Size = new System.Drawing.Size(0, 24);
             this.timeInfoLabel.TabIndex = 11;
-            this.timeInfoLabel.Text = "label1";
             this.timeInfoLabel.Visible = false;
+            // 
+            // noInternetLabel
+            // 
+            this.noInternetLabel.AutoSize = true;
+            this.noInternetLabel.ForeColor = System.Drawing.Color.Red;
+            this.noInternetLabel.Location = new System.Drawing.Point(97, 233);
+            this.noInternetLabel.Name = "noInternetLabel";
+            this.noInternetLabel.Size = new System.Drawing.Size(363, 18);
+            this.noInternetLabel.TabIndex = 12;
+            this.noInternetLabel.Text = "Нет интернета, следующий пробный запуск через: ";
+            this.noInternetLabel.Visible = false;
             // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(555, 296);
+            this.Controls.Add(this.noInternetLabel);
             this.Controls.Add(this.timeInfoLabel);
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.stopButt);
@@ -204,6 +216,7 @@
         private System.ComponentModel.BackgroundWorker backgroundWorker;
         private System.Windows.Forms.Timer timer;
         private System.Windows.Forms.Label timeInfoLabel;
+        private System.Windows.Forms.Label noInternetLabel;
     }
 }
 
