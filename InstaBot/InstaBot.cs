@@ -9,7 +9,6 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Threading;
-using System.Diagnostics;
 using System.IO; 
 
 
@@ -29,13 +28,14 @@ namespace InstaBot
         private SendMessageClass _sendMessageCoor;    /* class with coordinates for buttons 
                                                        that are necessary for sending a message  in Instagram */
 
+        //
         public MainWindow()
         {
             InitializeComponent();
             _LoadSendMessageCoor(); 
         }
 
-
+        //
         /// <summary>
         /// Loads json file that contains information about button coordinates
         /// </summary>
@@ -53,7 +53,6 @@ namespace InstaBot
                 MessageBox.Show("Нет файла insta_send_message.json", "Info"); 
             }
         }
-
         private void loadCsvButt_Click(object sender, EventArgs e)
         {
             fileDialog.Filter = "csv files (*.csv)|*.csv"; 
@@ -86,7 +85,6 @@ namespace InstaBot
                 return;
             }
         }
-
         private void startButt_Click(object sender, EventArgs e)
         {
             //if the user didn`t choose csv or txt file
@@ -125,8 +123,31 @@ namespace InstaBot
                 startButt.Enabled = true;
             }
         }
-       
+        private void timer_Tick(object sender, EventArgs e)
+        {
+            /*UPDATES EVERY _TIME_INTERVAL miliseconds*/
 
+            if(_pauseFor <= 0) // create a new process if it is appropriate time
+            {
+                timeInfoLabel.Visible = false;  
+                timer.Enabled = false;
+
+                noInternetLabel.Visible = false;
+
+                progressBar.Show();
+
+                backgroundWorker.RunWorkerAsync(); 
+            }
+            else
+            {                 
+                _pauseFor -= 1; // count down remaining time
+                TimeSpan time = TimeSpan.FromSeconds(_pauseFor);
+
+                timeInfoLabel.Text = $"{time.Minutes}:{time.Seconds}"; 
+            }
+        }
+       
+        //
         /// <summary>
         /// Check if the user chose two files
         /// </summary>
@@ -134,7 +155,6 @@ namespace InstaBot
         {
             return _filePathCSV != null && _filePathTXT != null; 
         }
-
         private void backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
         { 
             BackgroundWorker worker = sender as BackgroundWorker;
@@ -200,30 +220,6 @@ namespace InstaBot
 
                 progressBar.Hide();
             } 
-        }
-
-        private void timer_Tick(object sender, EventArgs e)
-        {
-            /*UPDATES EVERY _TIME_INTERVAL miliseconds*/
-
-            if(_pauseFor <= 0) // create a new process if it is appropriate time
-            {
-                timeInfoLabel.Visible = false;  
-                timer.Enabled = false;
-
-                noInternetLabel.Visible = false;
-
-                progressBar.Show();
-
-                backgroundWorker.RunWorkerAsync(); 
-            }
-            else
-            {                 
-                _pauseFor -= 1; // count down remaining time
-                TimeSpan time = TimeSpan.FromSeconds(_pauseFor);
-
-                timeInfoLabel.Text = $"{time.Minutes}:{time.Seconds}"; 
-            }
         }
 
     }
