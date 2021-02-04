@@ -99,7 +99,7 @@ namespace InstaBot
 
                     if (!_CheckInternetConnection())
                     { 
-                        events.Result = ResultsEnum.NO_INTERNET;
+                        events.Result = ResultsEnum.NO_INTERNET; 
                         _CloseChromeTab(); 
                         return;
                     }
@@ -108,19 +108,17 @@ namespace InstaBot
                     readBytes += line.Length + 2; // add original size of the line. +2 for '/n' and '/r' 
 
                     //not instagram link was passed
-                    if (!_IsInstagramLink(trimedLine))
+                    if (!_IsInstagramLink(trimedLine)) 
                     {
                         _SaveInfoFile(readBytes);
                         continue; 
                     }
 
                     string userName = _GetNickname(trimedLine); // get only user name from line
-                    if (_UserExists(userName)) // check if the user with current name exists in Instragram
-                    {
-                        string message = _messagesToUser[_random.Next(0, _messagesToUser.Count)]; //get random message for each user
-         //Debug               _SendMessageAction(userName, message);
-                    }
-                   
+                    
+                    string message = _messagesToUser[_random.Next(0, _messagesToUser.Count)]; //get random message for each user
+                    _SendMessageAction(userName, message);
+                    
                     _SaveInfoFile(readBytes); 
 
                     //catch  the case when user whants to interrup the process
@@ -279,24 +277,6 @@ namespace InstaBot
                 return true; 
             }
             return true;
-        }
-
-        /// <summary>
-        /// Checks is the user with a certain nick name  exists in Instagram
-        /// </summary>
-        private  bool _UserExists(string user)
-        {
-            using (HttpClient client = new HttpClient())
-            { 
-                Task<HttpResponseMessage> response =  client.GetAsync($"https://www.instagram.com/{user}/");
-
-                Task.WaitAll(response);
-                if (response.Result.StatusCode == HttpStatusCode.NotFound)
-                {
-                    return false;
-                }
-            }  
-                return true;
         }
 
         /// <summary>
