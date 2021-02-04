@@ -267,10 +267,10 @@ namespace InstaBot
             {
                 return false;
             }
-            else if(link.Length >4)
+            else if(link.Length >6) // https:
             {
                // instagram link will be splited to [https://wwww, instagram, com/....]
-               if(link.Substring(0,4) == "http" && link.Split('.')[1] != "instagram")
+               if((link.Substring(0,5) == "http:" || link.Substring(0, 6) == "https:") && link.Split('.')[1] != "instagram")
                 {
                     return false; 
                 }
