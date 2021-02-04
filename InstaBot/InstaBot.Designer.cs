@@ -194,8 +194,7 @@
             this.Controls.Add(this.loadFileButton);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.Name = "MainWindow";
-            this.Text = "InstaBot";
-            this.Load += new System.EventHandler(this.Form1_Load);
+            this.Text = "InstaBot"; 
             this.ResumeLayout(false);
             this.PerformLayout();
 

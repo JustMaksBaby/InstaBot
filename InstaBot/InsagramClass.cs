@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Text; 
 using System.Threading.Tasks;
 using System.ComponentModel;
 using System.Threading; 
@@ -10,34 +10,10 @@ using System.Net.Http;
 using System.Windows.Forms; 
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
+using System.Runtime.InteropServices; 
 
 namespace InstaBot
 {
-    internal class MouseAction
-    {
-        /// <summary>
-        /// Immitates mouse`s buttons pressing
-        /// </summary>
-        [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
-        private static extern void mouse_event(uint dwFlags, uint dx, uint dy, uint cButtons, uint dwExtraInfo); 
-   
-        [DllImport("User32.Dll")]
-        private static extern long SetCursorPos(uint x, uint y);
-
-        //Mouse actions
-        private const int MOUSEEVENTF_LEFTDOWN = 0x02;
-        private const int MOUSEEVENTF_LEFTUP = 0x04;
-
-        public static  void MousePressLeft(uint x, uint y, Random random)
-        {
-            SetCursorPos(x, y);
-
-            Thread.Sleep(random.Next(2000, 2500));  // immitates pause like a human
-
-            mouse_event(MOUSEEVENTF_LEFTDOWN|MOUSEEVENTF_LEFTUP, x, y, 0,0); 
-        }
-    } 
     internal class Instagram
     {
         private string _filePathCSV; // path to where the users nick names  are 
@@ -46,8 +22,26 @@ namespace InstaBot
 
         private List<string>  _messagesToUser = new List<string>();  // stores messages that will be sent to users
 
-        private Random _random; 
+        private Random _random;
+        private SendMessageClass _sendMessageCoor;   /* class with coordinates for buttons 
+                                                        that are necessary for sending a message  in Instagram */
 
+        //
+        public Instagram(SendMessageClass sendMessageCoor, string filePathCSV, string filePathTXT)
+        {
+            _sendMessageCoor = sendMessageCoor; 
+
+            _filePathCSV = filePathCSV;
+            _filePathTXT = filePathTXT;
+
+            _LoadTXTFile(); 
+
+            //create name for info file 
+            string csvFileName = _filePathCSV.Split('\\').Last().Split('.')[0];
+            _infoFile = $"{csvFileName}_info.txt"; 
+        }
+
+        //
         /// <summary>
         /// Checks the internet connection
         /// </summary>
@@ -68,18 +62,6 @@ namespace InstaBot
                     return false;
                 }
             }
-        }
-
-        public Instagram(string filePathCSV, string filePathTXT)
-        {
-            _filePathCSV = filePathCSV;
-            _filePathTXT = filePathTXT;
-
-            _LoadTXTFile(); 
-
-            //create name for info file 
-            string csvFileName = _filePathCSV.Split('\\').Last().Split('.')[0];
-            _infoFile = $"{csvFileName}_info.txt"; 
         }
 
         // MAIN WORK
@@ -136,7 +118,7 @@ namespace InstaBot
                     if (_UserExists(userName)) // check if the user with current name exists in Instragram
                     {
                         string message = _messagesToUser[_random.Next(0, _messagesToUser.Count)]; //get random message for each user
-                        _SendMessageAction(userName, message);
+         //Debug               _SendMessageAction(userName, message);
                     }
                    
                     _SaveInfoFile(readBytes); 
@@ -167,6 +149,7 @@ namespace InstaBot
             Process.Start("chrome", "https://www.instagram.com/"); // if chrome wasn`t loaded it will create a new process
             Thread.Sleep(5000); // wait Instagram to load  
         }
+
         /// <summary>
         /// opens a CSV file with users nicknames
         /// </summary>
@@ -322,15 +305,15 @@ namespace InstaBot
         private void _SendMessageAction(string userName, string message)
         {
             
-            //press button to go on messages page
-            MouseAction.MousePressLeft(1086,134, _random); 
+            // press button to go on messages page
+            MouseAction.MousePressLeft(_sendMessageCoor.MessagePage.Item1, _sendMessageCoor.MessagePage.Item2, _random); 
             Thread.Sleep(_random.Next(1000, 2000));
 
-            //press button to seach users
-            MouseAction.MousePressLeft(615, 202, _random);
+            // press button to seach users
+            MouseAction.MousePressLeft(_sendMessageCoor.SearchUsers.Item1, _sendMessageCoor.SearchUsers.Item2, _random);
             Thread.Sleep(_random.Next(1000, 3000));
 
-            //copy and paste user name in the opened field
+            // copy and paste user name in the opened field
             Thread thread = new Thread(() => Clipboard.SetText(userName));
             thread.SetApartmentState(ApartmentState.STA); //Set the thread to STA
             thread.Start();
@@ -338,15 +321,15 @@ namespace InstaBot
             SendKeys.SendWait("^{v}");
             Thread.Sleep(_random.Next(2000, 3000));  
 
-            //press on the the first user
-            MouseAction.MousePressLeft(752,443, _random);
+            // press on the the first user
+            MouseAction.MousePressLeft(_sendMessageCoor.FirstUser.Item1, _sendMessageCoor.FirstUser.Item2, _random);
             Thread.Sleep(_random.Next(2000, 3000));
 
             // press on the button "Next"
-            MouseAction.MousePressLeft(923, 314, _random);
+            MouseAction.MousePressLeft(_sendMessageCoor.Next.Item1, _sendMessageCoor.Next.Item2, _random);
             Thread.Sleep(_random.Next(2000, 3000));
 
-            //copy and paste message for the user
+            // copy and paste message for the user
             thread = new Thread(() => Clipboard.SetText(message));
             thread.SetApartmentState(ApartmentState.STA); //Set the thread to STA
             thread.Start();
@@ -360,7 +343,7 @@ namespace InstaBot
 
 
             Thread.Sleep(_random.Next(2000, 3000)); 
-        }
+        } 
 
     }
 }

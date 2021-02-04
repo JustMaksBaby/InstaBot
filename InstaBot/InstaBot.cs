@@ -5,10 +5,12 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Threading;
-using System.Diagnostics; 
+using System.Diagnostics;
+using System.IO; 
 
 
 
@@ -22,17 +24,34 @@ namespace InstaBot
         private int _pauseFor = 0; // sets in seconds how long should the program wait before sending messages
         private const int _TIMER_INTERVAL = 1000;  //sets the interval for timer 
 
-        private Random _random = new Random(); 
+        private Random _random = new Random();
+
+        private SendMessageClass _sendMessageCoor;    /* class with coordinates for buttons 
+                                                       that are necessary for sending a message  in Instagram */
 
         public MainWindow()
         {
             InitializeComponent();
+            _LoadSendMessageCoor(); 
         }
 
 
-        private void Form1_Load(object sender, EventArgs e)
+        /// <summary>
+        /// Loads json file that contains information about button coordinates
+        /// </summary>
+        private async void _LoadSendMessageCoor()
         {
-
+            if (File.Exists("insta_send_message.json"))
+            {
+                using (System.IO.FileStream file = new System.IO.FileStream("insta_send_message.json", FileMode.Open))
+                {
+                    _sendMessageCoor = await JsonSerializer.DeserializeAsync<SendMessageClass>(file);
+                }
+            }
+            else
+            {
+                MessageBox.Show("Нет файла insta_send_message.json", "Info"); 
+            }
         }
 
         private void loadCsvButt_Click(object sender, EventArgs e)
@@ -51,7 +70,6 @@ namespace InstaBot
                 return;
             }
         }
-
         private void loadTxtButt_Click(object sender, EventArgs e)
         {
             fileDialog.Filter = "txt files(*.txt) | *.txt";
@@ -72,7 +90,8 @@ namespace InstaBot
         private void startButt_Click(object sender, EventArgs e)
         {
             //if the user didn`t choose csv or txt file
-            if(!IsValid())
+            //or json file with coordinates is absent
+            if(!_IsValid() ||  _sendMessageCoor == null)
             {
                 MessageBox.Show("Не все данные были введены","Info" ); 
             }
@@ -111,7 +130,7 @@ namespace InstaBot
         /// <summary>
         /// Check if the user chose two files
         /// </summary>
-        private bool IsValid()
+        private bool _IsValid()
         {
             return _filePathCSV != null && _filePathTXT != null; 
         }
@@ -120,10 +139,9 @@ namespace InstaBot
         { 
             BackgroundWorker worker = sender as BackgroundWorker;
 
-            Instagram inst = new Instagram(_filePathCSV, _filePathTXT);
+            Instagram inst = new Instagram(_sendMessageCoor, _filePathCSV, _filePathTXT);
             inst.Start(worker, e);
         }
-
         private void backgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             if (!e.Cancelled)
