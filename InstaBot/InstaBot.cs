@@ -37,7 +37,7 @@ namespace InstaBot
 
         //
         /// <summary>
-        /// Loads json file that contains information about button coordinates
+        /// Loads json file that contains information about button coordinates in Instagramm
         /// </summary>
         private async void _LoadSendMessageCoor()
         {
@@ -160,7 +160,7 @@ namespace InstaBot
             BackgroundWorker worker = sender as BackgroundWorker;
 
             Instagram inst = new Instagram(_sendMessageCoor, _filePathCSV, _filePathTXT);
-            inst.Start(worker, e);
+            inst.SendMessageStart(worker, e);
         }
         private void backgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {

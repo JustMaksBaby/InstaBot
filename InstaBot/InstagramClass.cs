@@ -70,7 +70,7 @@ namespace InstaBot
         /// </summary>
         /// <param name="worker">Backgroundworker that started current process</param>
         /// <param name="events"></param>
-        public  void Start(BackgroundWorker worker, DoWorkEventArgs events) 
+        public  void SendMessageStart(BackgroundWorker worker, DoWorkEventArgs events) 
         {
             _random = new Random();
 
@@ -170,7 +170,7 @@ namespace InstaBot
             {
                 using (StreamReader file = new StreamReader(_infoFile))
                 {
-                    int readBytes;
+                    int readBytes; // bytes that are already read from the certain csv file
                     int.TryParse(file.ReadLine(), out readBytes);
                    
                     return readBytes;
@@ -186,7 +186,6 @@ namespace InstaBot
         /// Save information about how many bytes were read  from csv file
         /// This information is used if  we stopped processing file and need to resume later
         /// </summary>
-        /// <param name="readBytes"></param>
         private void _SaveInfoFile(int readBytes)
         {
             using (StreamWriter file = new StreamWriter(_infoFile))
@@ -267,7 +266,7 @@ namespace InstaBot
             {
                 return false;
             }
-            else if(link.Length >6) // https:
+            else if(link.Length >6) // http:... or https:....
             {
                // instagram link will be splited to [https://wwww, instagram, com/....]
                if((link.Substring(0,5) == "http:" || link.Substring(0, 6) == "https:") && link.Split('.')[1] != "instagram")
